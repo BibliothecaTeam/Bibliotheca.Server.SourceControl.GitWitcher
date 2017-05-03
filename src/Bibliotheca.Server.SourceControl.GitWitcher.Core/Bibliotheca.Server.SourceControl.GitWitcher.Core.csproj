@@ -10,4 +10,8 @@
     <NetStandardImplicitPackageVersion>1.6.1</NetStandardImplicitPackageVersion>
   </PropertyGroup>
 
+  <ItemGroup>
+    <DotNetCliToolReference Include="libyear" Version="*" />
+  </ItemGroup>
+
 </Project>

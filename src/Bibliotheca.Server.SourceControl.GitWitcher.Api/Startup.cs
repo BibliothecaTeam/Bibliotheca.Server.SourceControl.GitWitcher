@@ -8,22 +8,33 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Versioning;
-using Swashbuckle.Swagger.Model;
 using Bibliotheca.Server.ServiceDiscovery.ServiceClient;
 using System;
 using System.Collections.Generic;
 using Bibliotheca.Server.ServiceDiscovery.ServiceClient.Extensions;
 using Bibliotheca.Server.SourceControl.GitWitcher.Core.Parameters;
 using Bibliotheca.Server.SourceControl.GitWitcher.Core.Services;
+using Swashbuckle.AspNetCore.Swagger;
+using Microsoft.Extensions.PlatformAbstractions;
+using System.IO;
+using Bibliotheca.Server.Mvc.Middleware.Authorization.SecureTokenAuthentication;
+using Bibliotheca.Server.Mvc.Middleware.Authorization.BearerAuthentication;
 
 namespace Bibliotheca.Server.SourceControl.GitWitcher.Core.Api
 {
+    /// <summary>
+    /// Startup class.
+    /// </summary>
     public class Startup
     {
-        public IConfigurationRoot Configuration { get; }
+        private IConfigurationRoot Configuration { get; }
 
-        protected bool UseServiceDiscovery { get; set; } = true;
+        private bool UseServiceDiscovery { get; set; } = true;
 
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="env">Environment parameters.</param>
         public Startup(IHostingEnvironment env)
         {
             var builder = new ConfigurationBuilder()
@@ -34,6 +45,11 @@ namespace Bibliotheca.Server.SourceControl.GitWitcher.Core.Api
             Configuration = builder.Build();
         }
 
+        /// <summary>
+        /// Service configuration.
+        /// </summary>
+        /// <param name="services">List of services.</param>
+        /// <returns>Service provider.</returns>
         public void ConfigureServices(IServiceCollection services)
         {
             services.Configure<ApplicationParameters>(Configuration);
@@ -66,16 +82,19 @@ namespace Bibliotheca.Server.SourceControl.GitWitcher.Core.Api
                 options.ApiVersionReader = new QueryStringOrHeaderApiVersionReader("api-version");
             });
 
-            services.AddSwaggerGen();
-            services.ConfigureSwaggerGen(options =>
+            services.AddSwaggerGen(options =>
             {
-                options.SingleApiVersion(new Info
+                options.SwaggerDoc("v1", new Info
                 {
                     Version = "v1",
                     Title = "Source Control GitWitcher API",
                     Description = "Microservice for Git integration feature for Bibliotheca.",
                     TermsOfService = "None"
                 });
+
+                var basePath = PlatformServices.Default.Application.ApplicationBasePath;
+                var xmlPath = Path.Combine(basePath, "Bibliotheca.Server.SourceControl.GitWitcher.Api.xml"); 
+                options.IncludeXmlComments(xmlPath);
             });
 
             services.AddServiceDiscovery();
@@ -83,6 +102,12 @@ namespace Bibliotheca.Server.SourceControl.GitWitcher.Core.Api
             services.AddScoped<IQuestsService, QuestsService>();
         }
 
+        /// <summary>
+        /// Configure web application.
+        /// </summary>
+        /// <param name="app">Application builder.</param>
+        /// <param name="env">Environment parameters.</param>
+        /// <param name="loggerFactory">Logger.</param>
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
             if (UseServiceDiscovery)
@@ -117,7 +142,10 @@ namespace Bibliotheca.Server.SourceControl.GitWitcher.Core.Api
             app.UseMvc();
 
             app.UseSwagger();
-            app.UseSwaggerUi();
+            app.UseSwaggerUI(options =>
+            {
+                options.SwaggerEndpoint("/swagger/v1/swagger.json", "API v1");
+            });
         }
 
         private ServiceDiscoveryOptions GetServiceDiscoveryOptions()
