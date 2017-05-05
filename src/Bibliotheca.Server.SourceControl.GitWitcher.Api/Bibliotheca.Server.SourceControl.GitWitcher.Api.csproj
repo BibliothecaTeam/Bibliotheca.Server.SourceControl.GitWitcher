@@ -1,5 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
+
   <PropertyGroup>
+    <VersionPrefix>1.0.0</VersionPrefix>
     <TargetFramework>netcoreapp1.1</TargetFramework>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <DebugType>portable</DebugType>
@@ -13,9 +15,11 @@
     <GenerateDocumentation>true</GenerateDocumentation>
     <DocumentationFile>Bibliotheca.Server.SourceControl.GitWitcher.Api.xml</DocumentationFile>
   </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="../Bibliotheca.Server.SourceControl.GitWitcher.Core/Bibliotheca.Server.SourceControl.GitWitcher.Core.csproj" />
   </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics" Version="1.1.1" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="1.1.2" />
@@ -34,16 +38,19 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="1.0.0" />
     <PackageReference Include="Bibliotheca.Server.Mvc.Middleware.Authorization" Version="1.0.8" />
     <PackageReference Include="Bibliotheca.Server.Mvc.Middleware.Diagnostics" Version="1.0.6" />
-    <PackageReference Include="Bibliotheca.Server.ServiceDiscovery.ServiceClient" Version="1.0.14" />
+    <PackageReference Include="Bibliotheca.Server.ServiceDiscovery.ServiceClient" Version="1.0.18" />
   </ItemGroup>
+
   <ItemGroup>
     <DotNetCliToolReference Include="Microsoft.Extensions.SecretManager.Tools" Version="1.0.0" />
     <DotNetCliToolReference Include="libyear" Version="*" />
   </ItemGroup>
+
   <Target Name="PrepublishScript" BeforeTargets="PrepareForPublish">
     <ItemGroup>
       <DocFile Include="bin\*\*\Bibliotheca.Server.SourceControl.GitWitcher.Api.xml" />
     </ItemGroup>
     <Copy SourceFiles="@(DocFile)" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="false" />
   </Target>
+
 </Project>
